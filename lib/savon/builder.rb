@@ -18,6 +18,7 @@ module Savon
     }
 
     def initialize(operation_name, wsdl, globals, locals)
+      p "Builder::initialize"
       @operation_name = operation_name
 
       @wsdl    = wsdl
@@ -29,10 +30,12 @@ module Savon
     end
 
     def pretty
+      p "Builder::pretty"
       Nokogiri.XML(to_s).to_xml(:indent => 2)
     end
 
     def to_s
+      p "Builder::to_s"
       return @locals[:xml] if @locals.include? :xml
 
       tag(builder, :Envelope, namespaces_with_globals) do |xml|
@@ -44,6 +47,7 @@ module Savon
     private
 
     def convert_type_definitions_to_hash
+      p "Builder::convert_type_definitions_to_hash"
       @wsdl.type_definitions.inject({}) do |memo, (path, type)|
         memo[path] = type
         memo
@@ -51,6 +55,7 @@ module Savon
     end
 
     def convert_type_namespaces_to_hash
+      p "Builder::convert_type_namespaces_to_hash"
       @wsdl.type_namespaces.inject({}) do |memo, (path, uri)|
         key, value = use_namespace(path, uri)
         memo[key] = value
@@ -59,6 +64,7 @@ module Savon
     end
 
     def use_namespace(path, uri)
+      p "Builder::use_namespace"
       @internal_namespace_count ||= 0
 
       unless identifier = namespace_by_uri(uri)
@@ -71,10 +77,13 @@ module Savon
     end
 
     def namespaces_with_globals
+      p "Builder::namespaces_with_globals"
       namespaces.merge @globals[:namespaces]
     end
 
     def namespaces
+      p "Builder::namespaces"
+      
       @namespaces ||= begin
         namespaces = SCHEMA_TYPES.dup
         namespaces["xmlns:#{namespace_identifier}"] = @globals[:namespace] || @wsdl.namespace
@@ -88,14 +97,17 @@ module Savon
     end
 
     def env_namespace
+      p "Builder::env_namespace"
       @env_namespace ||= @globals[:env_namespace] || :env
     end
 
     def header
+      p "Builder::header"
       @header ||= Header.new(@globals, @locals)
     end
 
     def namespaced_message_tag
+      p "Builder::namespaced_message_tag"
       if @used_namespaces[[@operation_name.to_s]]
         [@used_namespaces[[@operation_name.to_s]], message_tag, message_attributes]
       else
@@ -104,6 +116,7 @@ module Savon
     end
 
     def message_tag
+      p "Builder::message_tag"
       message_tag = @locals[:message_tag]
       message_tag ||= @wsdl.soap_input(@operation_name.to_sym) if @wsdl.document?
       message_tag ||= Gyoku.xml_tag(@operation_name, :key_converter => @globals[:convert_request_keys_to])
@@ -112,10 +125,12 @@ module Savon
     end
 
     def message_attributes
+      p "Builder::message_attributes"
       @locals[:attributes] || {}
     end
 
     def message
+      p "Builder::message"
       element_form_default = @globals[:element_form_default] || @wsdl.element_form_default
       # TODO: clean this up! [dh, 2012-12-17]
       Message.new(@operation_name, namespace_identifier, @types, @used_namespaces, @locals[:message],
@@ -123,6 +138,7 @@ module Savon
     end
 
     def namespace_identifier
+      p "Builder::namespace_identifier"
       return @globals[:namespace_identifier] if @globals.include? :namespace_identifier
       return @namespace_identifier if @namespace_identifier
 
@@ -134,6 +150,7 @@ module Savon
     end
 
     def namespace_by_uri(uri)
+      p "Builder::namespace_by_uri"
       namespaces.each do |candidate_identifier, candidate_uri|
         return candidate_identifier.gsub(/^xmlns:/, '') if candidate_uri == uri
       end
@@ -141,12 +158,14 @@ module Savon
     end
 
     def builder
+      p "Builder::builder"
       builder = ::Builder::XmlMarkup.new
       builder.instruct!(:xml, :encoding => @globals[:encoding])
       builder
     end
 
     def tag(xml, name, namespaces = {}, &block)
+      p "Builder::tag"
       if env_namespace && env_namespace != ""
         xml.tag! env_namespace, name, namespaces, &block
       else

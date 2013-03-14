@@ -5,6 +5,8 @@ module Savon
   class Message
 
     def initialize(operation_name, namespace_identifier, types, used_namespaces, message, element_form_default, key_converter)
+      p "Message::initialize"
+      
       @operation_name = operation_name
       @namespace_identifier = namespace_identifier
       @types = types
@@ -16,6 +18,8 @@ module Savon
     end
 
     def to_s
+      p "Message::to_s"
+      
       return @message.to_s unless @message.kind_of? Hash
 
       if @element_form_default == :qualified

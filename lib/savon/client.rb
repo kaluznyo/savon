@@ -8,6 +8,7 @@ module Savon
   class Client
 
     def initialize(globals = {}, &block)
+      p "Client::initialize"
       unless globals.kind_of? Hash
         raise_version1_initialize_error! globals
       end
@@ -24,21 +25,25 @@ module Savon
     attr_reader :globals
 
     def operations
+      p "Client::operations"
       raise_missing_wsdl_error! unless @wsdl.document?
       @wsdl.soap_actions
     end
 
     def operation(operation_name)
+      p "Client::operation"
       Operation.create(operation_name, @wsdl, @globals)
     end
 
     def call(operation_name, locals = {}, &block)
+      p "Client::call"
       operation(operation_name).call(locals, &block)
     end
 
     private
 
     def set_globals(globals, block)
+      p "Client::set_globals"
       globals = GlobalOptions.new(globals)
       BlockInterface.new(globals).evaluate(block) if block
 
@@ -46,6 +51,7 @@ module Savon
     end
 
     def build_wsdl_document
+      p "Client::build_wsdl_document"
       @wsdl = Wasabi::Document.new
 
       @wsdl.document  = @globals[:wsdl]      if @globals.include? :wsdl
@@ -56,6 +62,7 @@ module Savon
     end
 
     def wsdl_or_endpoint_and_namespace_specified?
+      p "Client::wsdl_or_endpoint_and_namespace_specified"
       @globals.include?(:wsdl) || (@globals.include?(:endpoint) && @globals.include?(:namespace))
     end
 
@@ -67,6 +74,8 @@ module Savon
     end
 
     def raise_initialization_error!
+      p "Client::raise_initialization_error"
+      
       raise InitializationError,
             "Expected either a WSDL document or the SOAP endpoint and target namespace options.\n\n" \
             "Savon.client(wsdl: '/Users/me/project/service.wsdl')                              # to use a local WSDL document\n" \
@@ -75,6 +84,7 @@ module Savon
     end
 
     def raise_missing_wsdl_error!
+      p "Client::raise_missing_wsdl_error"
       raise "Unable to inspect the service without a WSDL document."
     end
 

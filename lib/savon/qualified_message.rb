@@ -4,12 +4,15 @@ module Savon
   class QualifiedMessage
 
     def initialize(types, used_namespaces, key_converter)
+      p "QualifiedMessage::initialize"
       @types = types
       @used_namespaces = used_namespaces
       @key_converter = key_converter
     end
 
     def to_hash(hash, path)
+      p "QualifiedMessage::to_hash"
+      
       return unless hash
       return hash.map { |value| to_hash(value, path) } if hash.kind_of?(Array)
       return hash.to_s unless hash.kind_of? Hash
@@ -33,6 +36,8 @@ module Savon
     private
 
     def add_namespaces_to_values(values, path)
+      p "QualifiedMessage::add_namespaces_to_values"
+      
       values.collect! { |value|
         camelcased_value = Gyoku.xml_tag(value, :key_converter => @key_converter)
         namespace_path = path + [camelcased_value.to_s]
