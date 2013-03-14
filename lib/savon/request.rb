@@ -6,24 +6,29 @@ module Savon
     def initialize(globals, http_request = nil)
       @globals = globals
       @http_request = http_request || HTTPI::Request.new
+      p "HTTPRequest::Initialize"
     end
 
     def build
       @http_request
+      p "HTTPRequest::Build"
     end
 
     private
 
     def configure_proxy
       @http_request.proxy = @globals[:proxy] if @globals.include? :proxy
+      p "HTTPRequest::configure_proxy"
     end
 
     def configure_timeouts
       @http_request.open_timeout = @globals[:open_timeout] if @globals.include? :open_timeout
       @http_request.read_timeout = @globals[:read_timeout] if @globals.include? :read_timeout
+      p "HTTPRequest::configure_timeouts"
     end
 
     def configure_ssl
+      p "HTTPRequest::configure_ssl"
       @http_request.auth.ssl.ssl_version   = @globals[:ssl_version]       if @globals.include? :ssl_version
       @http_request.auth.ssl.verify_mode   = @globals[:ssl_verify_mode]   if @globals.include? :ssl_verify_mode
 
@@ -35,6 +40,7 @@ module Savon
     end
 
     def configure_auth
+      p "HTTPRequest::configure_auth"
       @http_request.auth.basic(*@globals[:basic_auth])   if @globals.include? :basic_auth
       @http_request.auth.digest(*@globals[:digest_auth]) if @globals.include? :digest_auth
     end
@@ -44,6 +50,7 @@ module Savon
   class WSDLRequest < HTTPRequest
 
     def build
+      p "WSDLRequest::build"
       configure_proxy
       configure_timeouts
       configure_ssl
@@ -62,6 +69,7 @@ module Savon
     }
 
     def build(options = {})
+      p "SOAPRequest::build"
       configure_proxy
       configure_cookies options[:cookies]
       configure_timeouts
